@@ -5,11 +5,17 @@ const moment = require('moment');
 exports.handler = async function (event, context, callback) {
     let messageResponse = "";
     try{
+        // get event body
         const base64 = event.body;
+
+        // image buffer
         const base64Data = new Buffer.from(base64.replace(/^data:image\/\w+;base64,/, ""), 'base64');
         const type = base64.split(';')[0].split('/')[1];
-      
+        
+        // save to s3
         const s3Response = await saveImageToS3(base64Data , type);
+
+        // call rekognition
         const objectResponse = await detectObject(s3Response);
         
         messageResponse = objectResponse;
@@ -29,6 +35,11 @@ exports.handler = async function (event, context, callback) {
     return response;
 };
 
+/**
+ * Call Rekognition api to detect the object 
+ * from s3
+ * @param {*} s3Object 
+ */
 const detectObject = async (s3Object) =>{
     const params = {
       Image: {
@@ -45,6 +56,11 @@ const detectObject = async (s3Object) =>{
     return rekognitionResponse;
 };
 
+/**
+ * Save image to S3
+ * @param {} base64Data 
+ * @param {*} type 
+ */
 const saveImageToS3 = async (base64Data, type) =>{
     let params = {
             Bucket: 'api-rekognition-repo',
