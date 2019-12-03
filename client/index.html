@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Api Rekognition</title>
+  </head>
+
+  <style>
+    body {
+        width: 70%;
+        margin: 0 auto;
+        align-content: center;
+    }
+  </style>
+  <body>
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-12">
+                    <div class="jumbotron jumbotron-fluid">
+                        <div class="container">
+                            <h1 class="display-4">Api Rekognition Workshop</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-md-offset-3">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">Upload your image</h5>
+                            <form enctype="multipart/form-data" id="uploadImageForm">
+                                <div class="form-group">
+                                    <input type="file" id="file" name="file" type="file" class="form-control-file">
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" id="btnUploadImage">Upload</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+        </div>
+    <script
+        src="https://code.jquery.com/jquery-3.4.1.js"
+        integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
+
+
+<script>
+
+$(document).ready(function(){
+
+    // trigger for click
+    $('#btnUploadImage').click(async function(){
+        await uploadImage();
+    });
+
+
+    async function uploadImage(){
+        const API_URL = 'https://ohperwbvr2.execute-api.us-east-1.amazonaws.com/v1/uploadimage/';        
+        // get form file
+        var files = $('#file')[0].files[0];
+
+        // to base64 string
+        const result = await toBase64(files).catch(e => e);
+        if(result instanceof Error) {
+            console.log('Error: ', result.message);
+            return;
+        }
+
+        // ajax request
+        $.ajax({
+            url: API_URL,
+            type: 'post',
+            data: result,
+            success: function(response){
+                console.log(response)
+                if(response != 0){
+                    $("#img").attr("src",response); 
+                    $(".preview img").show(); // Display image element
+                }else{
+                    alert('file not uploaded');
+                }
+            },
+        });
+    }
+
+    /**
+     * File to Base64 string
+     * */
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+});
+</script>
