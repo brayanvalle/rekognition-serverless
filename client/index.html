@@ -26,7 +26,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-md-offset-3">
+                <div class="col-md-6">
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <h5 class="card-title">Upload your image</h5>
@@ -37,9 +37,26 @@
                                 <div class="form-group">
                                     <button type="button" class="btn btn-primary" id="btnUploadImage">Upload</button>
                                 </div>
+
+                                <div class="form-group">
+                                    <img id="imgInputDraw">
+                                </div>
                             </form>
                         </div>
                     </div>   
+                </div>
+                <div class="col-md-6">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Confidence</th>
+                            <th scope="col">Parents</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tblResults">
+                        </tbody>
+                      </table>
                 </div>
             </div>
         </div>
@@ -75,21 +92,36 @@ $(document).ready(function(){
             return;
         }
 
+        $('#imgInputDraw').attr('src' ,result );
+        
         // ajax request
         $.ajax({
             url: API_URL,
             type: 'post',
             data: result,
             success: function(response){
-                console.log(response)
-                if(response != 0){
-                    $("#img").attr("src",response); 
-                    $(".preview img").show(); // Display image element
-                }else{
-                    alert('file not uploaded');
-                }
+                console.log(response);
+                renderResult(response);         
             },
         });
+    }
+
+    function renderResult(result){
+        const table = $('#tblResults');
+        const labels = result.Labels;
+        let template = "";
+        for(let label of labels)
+        {
+            let tmp = `<tr>
+                        <td>${label.Name}</td>
+                        <td>${label.Confidence}</td>
+                        <td>${JSON.stringify(label.Parents)}</td>
+                    </tr>
+                    `;
+            template += tmp;
+        }
+
+        table.html(template);    
     }
 
     /**
